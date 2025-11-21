@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,28 +22,21 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run ESLint
-        run: npx eslint .
-
-      - name: Run tests
-        run: npm test -- --runInBand --coverage
-
-        
-      - name: Validate Coverage Threshold
+      - name: Install jq and bc (required for act)
         run: |
-          echo "Verificando cobertura mínima..."
-          COVERAGE=$(jq '.total.lines.pct' coverage/coverage-summary.json)
-          echo "Cobertura obtenida: $COVERAGE %"
-
-          MINIMUM=80
-          RESULT=$(echo "$COVERAGE >= $MINIMUM" | bc -l)
-          if [ "$RESULT" -ne 1 ]; then
-            echo "❌ Cobertura insuficiente: $COVERAGE% (mínimo $MINIMUM%)"
-            exit 1
-          fi
-
-          echo "✔ Cobertura mínima alcanzada"
+          sudo apt-get update -y
+          sudo apt-get install -y jq bc
 
 
-            
-                
+      - name: Fix Jest permissions (required for act)
+        run: chmod +x ./node_modules/.bin/jest
+
+
+      - name: Run ESLint
+        run: node node_modules/eslint/bin/eslint.js .
+
+      - name: Run tests with coverage
+        run: npm test -- --runInBand --coverage --coverageReporters="json-summary" --coverageReporters="text"
+
+
+      

@@ -1,13 +1,13 @@
 
-export function IsInteger(value:any): boolean {
+export function IsInteger(value:unknown): boolean {
     return Number.isInteger(value);
 }
 
-export function isPositive(value:any): boolean {
-    return value > 0;
+export function isPositive(value: unknown): boolean {
+    return typeof value === "number" && value > 0;
 }
 
-export function isArrayOfNumbers(arr: any): boolean {
+export function isArrayOfNumbers(arr: unknown): boolean {
 return Array.isArray(arr) && arr.every(n => typeof n === "number")
 }
 
