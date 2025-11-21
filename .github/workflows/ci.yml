@@ -1,0 +1,49 @@
+name: CI initial setup
+
+on: 
+  push:
+    branches: [ "main" ]
+  pull_request:
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npx eslint .
+
+      - name: Run tests
+        run: npm test -- --runInBand --coverage
+
+        
+      - name: Validate Coverage Threshold
+        run: |
+          echo "Verificando cobertura mínima..."
+          COVERAGE=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+          echo "Cobertura obtenida: $COVERAGE %"
+
+          MINIMUM=80
+          RESULT=$(echo "$COVERAGE >= $MINIMUM" | bc -l)
+          if [ "$RESULT" -ne 1 ]; then
+            echo "❌ Cobertura insuficiente: $COVERAGE% (mínimo $MINIMUM%)"
+            exit 1
+          fi
+
+          echo "✔ Cobertura mínima alcanzada"
+
+
+            
+                
